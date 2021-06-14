@@ -1,6 +1,9 @@
 package aes;
 
 public class AES {
+
+	private final int n = 4;
+
 	private static String[][] sBox = {
 			{ "0x63", "0x7C", "0x77", "0x7B", " 0xF2", " 0x6B", " 0x6F", " 0xC5", " 0x30", " 0x01", " 0x67", " 0x2B",
 					" 0xFE", " 0xD7", " 0xAB", " 0x76" },
@@ -34,4 +37,43 @@ public class AES {
 					" 0xCE", " 0x55", " 0x28", " 0xDF" },
 			{ "0x8C", " 0xA1", " 0x89", " 0x0D", " 0xBF", " 0xE6", " 0x42", " 0x68", " 0x41", " 0x99", " 0x2D", " 0x0F",
 					" 0xB0", " 0x54", " 0xBB", " 0x16" } };
+
+	private String[][] addRoundKey(String[][] currentRound, String[][] cipherKey) {
+		return currentRound; // TODO: implement
+	}
+
+	private String[][] subBytes(String[][] currentRound) {
+		return currentRound; // TODO: implement
+	}
+
+	private String[][] shiftRows(String[][] currentRound) {
+		return currentRound; // TODO: implement
+	}
+
+	private String[][] mixColumns(String[][] currentRound) {
+		return currentRound; // TODO: implement
+	}
+
+	private String[][] getRoundKey(int roundNo) {
+		return new String[n][n]; // TODO: implement
+	}
+
+	private String[][] performInitialRound(String[][] currentRound, String[][] cipherKey) {
+		return addRoundKey(currentRound, cipherKey);
+	}
+
+	private String[][] performMainRound(String[][] currentRound, int roundNo) {
+		String[][] temp = subBytes(currentRound);
+		temp = shiftRows(temp);
+		temp = mixColumns(temp);
+		temp = addRoundKey(temp, getRoundKey(roundNo));
+		return temp;
+	}
+
+	private String[][] performFinalRound(String[][] currentRound, int roundNo) {
+		String[][] temp = subBytes(currentRound);
+		temp = shiftRows(temp);
+		temp = addRoundKey(temp, getRoundKey(roundNo));
+		return temp;
+	}
 }
