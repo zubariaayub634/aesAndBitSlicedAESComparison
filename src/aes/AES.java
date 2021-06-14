@@ -3,6 +3,7 @@ package aes;
 public class AES {
 
 	private final int n = 4;
+	private final int aesRounds = 10;
 
 	private static String[][] sBox = {
 			{ "0x63", "0x7C", "0x77", "0x7B", " 0xF2", " 0x6B", " 0x6F", " 0xC5", " 0x30", " 0x01", " 0x67", " 0x2B",
@@ -38,42 +39,50 @@ public class AES {
 			{ "0x8C", " 0xA1", " 0x89", " 0x0D", " 0xBF", " 0xE6", " 0x42", " 0x68", " 0x41", " 0x99", " 0x2D", " 0x0F",
 					" 0xB0", " 0x54", " 0xBB", " 0x16" } };
 
-	private String[][] addRoundKey(String[][] currentRound, String[][] cipherKey) {
-		return currentRound; // TODO: implement
+	private String[][] addRoundKey(String[][] currentState, String[][] cipherKey) {
+		return currentState; // TODO: implement
 	}
 
-	private String[][] subBytes(String[][] currentRound) {
-		return currentRound; // TODO: implement
+	private String[][] subBytes(String[][] currentState) {
+		return currentState; // TODO: implement
 	}
 
-	private String[][] shiftRows(String[][] currentRound) {
-		return currentRound; // TODO: implement
+	private String[][] shiftRows(String[][] currentState) {
+		return currentState; // TODO: implement
 	}
 
-	private String[][] mixColumns(String[][] currentRound) {
-		return currentRound; // TODO: implement
+	private String[][] mixColumns(String[][] currentState) {
+		return currentState; // TODO: implement
 	}
 
 	private String[][] getRoundKey(int roundNo) {
 		return new String[n][n]; // TODO: implement
 	}
 
-	private String[][] performInitialRound(String[][] currentRound, String[][] cipherKey) {
-		return addRoundKey(currentRound, cipherKey);
+	private String[][] performInitialRound(String[][] currentState, String[][] cipherKey) {
+		return addRoundKey(currentState, cipherKey);
 	}
 
-	private String[][] performMainRound(String[][] currentRound, int roundNo) {
-		String[][] temp = subBytes(currentRound);
+	private String[][] performMainRound(String[][] currentState, int roundNo) {
+		String[][] temp = subBytes(currentState);
 		temp = shiftRows(temp);
 		temp = mixColumns(temp);
 		temp = addRoundKey(temp, getRoundKey(roundNo));
 		return temp;
 	}
 
-	private String[][] performFinalRound(String[][] currentRound, int roundNo) {
-		String[][] temp = subBytes(currentRound);
+	private String[][] performFinalRound(String[][] currentState) {
+		String[][] temp = subBytes(currentState);
 		temp = shiftRows(temp);
-		temp = addRoundKey(temp, getRoundKey(roundNo));
+		temp = addRoundKey(temp, getRoundKey(aesRounds));
 		return temp;
+	}
+
+	private String[][] encrypt(String[][] state, String[][] cipherKey) {
+		String[][] temp = performInitialRound(state, cipherKey);
+		for (int i = 1; i < aesRounds; i++) {
+			temp = performMainRound(temp, i);
+		}
+		return performFinalRound(temp);
 	}
 }
