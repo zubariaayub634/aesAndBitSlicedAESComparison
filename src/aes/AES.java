@@ -85,4 +85,20 @@ public class AES {
 		}
 		return performFinalRound(temp);
 	}
+
+	public static void main(String[] args) {
+		String[][] plainText = { { "0x54", "0x4f", "0x4e", "0x20" }, { "0x77", "0x6e", "0x69", "0x54" },
+				{ "0x6F", "0x65", "0x6e", "0x77" }, { "0x20", "0x20", "0x65", "0x6f" } };
+		String[][] key = { { "0x54", "0x73", "0x20", "0x67" }, { "0x68", "0x20", "0x4b", "0x20" },
+				{ "0x61", "0x6d", "0x75", "0x46" }, { "0x74", "0x79", "0x6e", "0x75" } };
+		AES aes = new AES();
+		String[][] cipherText = aes.encrypt(plainText, key);
+		System.out.println("\nCIPHER TEXT:");
+		for (int i = 0; i < aes.n; i++) {
+			for (int j = 0; j < aes.n; j++) {
+				System.out.print(cipherText[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
 }
