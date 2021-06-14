@@ -1,0 +1,5 @@
+# Compiled Java Class files
+*.class
+
+#user data file
+/bin/
