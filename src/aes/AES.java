@@ -72,9 +72,6 @@ public class AES {
 				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][3][j]);
 			}
 			allRoundKeys[i][3] = w4.clone();
-			printStringArray(allRoundKeys[i]);
-			System.out.println();
-			// break;
 		}
 	}
 
@@ -135,9 +132,9 @@ public class AES {
 		return allRoundKeys[roundNo];
 	}
 
-	private String[][] performInitialRound(String[][] currentState, String[][] cipherKey) {
+	private String[][] performInitialRound(String[][] currentState) {
 		System.out.println("\nINITIAL ROUND:");
-		return addRoundKey(currentState, cipherKey);
+		return addRoundKey(currentState, getRoundKey(0));
 	}
 
 	private String[][] performMainRound(String[][] currentState, Integer roundNo) {
@@ -158,7 +155,9 @@ public class AES {
 	}
 
 	private String[][] encrypt(String[][] state, String[][] cipherKey) {
-		String[][] temp = performInitialRound(state, cipherKey);
+		System.out.println("\nGENERATING ALL ROUND KEYS...");
+		generateAllRoundKeys(cipherKey);
+		String[][] temp = performInitialRound(state);
 		for (int i = 1; i < aesRounds; i++) {
 			temp = performMainRound(temp, i);
 		}
@@ -185,10 +184,9 @@ public class AES {
 		String[][] key = { { "0x54", "0x68", "0x61", "0x74" }, { "0x73", "0x20", "0x6d", "0x79" },
 				{ "0x20", "0x4b", "0x75", "0x6e" }, { "0x67", "0x20", "0x46", "0x75" } };
 		AES aes = new AES();
-		aes.generateAllRoundKeys(key);
-		// String[][] cipherText = aes.encrypt(plainText, key);
-		// System.out.println("\nCIPHER TEXT:");
-		// aes.printStringArray(cipherText);
+		String[][] cipherText = aes.encrypt(plainText, key);
+		System.out.println("\nCIPHER TEXT:");
+		aes.printStringArray(cipherText);
 
 	}
 }
