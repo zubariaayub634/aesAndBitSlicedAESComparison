@@ -101,9 +101,16 @@ public class AES {
 		return sBox[hexaToDecimal(row)][hexaToDecimal(col)];
 	}
 
-	private String[][] addRoundKey(String[][] currentState, String[][] cipherKey) {
+	private String[][] addRoundKey(String[][] currentState, String[][] roundKey) {
 		System.out.println("-> Adding Round Key: ");
-		return currentState; // TODO: implement
+		String[][] newState = currentState.clone();
+		for (int i = 0; i < newState.length; i++) {
+			for (int j = 0; j < newState[i].length; j++) {
+				newState[i][j] = bitwiseXOR(newState[i][j], roundKey[i][j]);
+			}
+		}
+		printStringArray(newState);
+		return newState; // TODO: implement
 	}
 
 	private String[][] subBytes(String[][] currentState) {
@@ -179,10 +186,10 @@ public class AES {
 	}
 
 	public static void main(String[] args) {
-		String[][] plainText = { { "0x54", "0x77", "0x6f", "0x20" }, { "0x4f", "0x6e", "0x65", "0x20" },
-				{ "0x4e", "0x69", "0x6e", "0x65" }, { "0x20", "0x54", "0x77", "0x6f" } };
-		String[][] key = { { "0x54", "0x68", "0x61", "0x74" }, { "0x73", "0x20", "0x6d", "0x79" },
-				{ "0x20", "0x4b", "0x75", "0x6e" }, { "0x67", "0x20", "0x46", "0x75" } };
+		String[][] plainText = { { "0x54", "0x4f", "0x4e", "0x20" }, { "0x77", "0x6e", "0x69", "0x54" },
+				{ "0x6F", "0x65", "0x6e", "0x77" }, { "0x20", "0x20", "0x65", "0x6f" } };
+		String[][] key = { { "0x54", "0x73", "0x20", "0x67" }, { "0x68", "0x20", "0x4b", "0x20" },
+				{ "0x61", "0x6d", "0x75", "0x46" }, { "0x74", "0x79", "0x6e", "0x75" } };
 		AES aes = new AES();
 		String[][] cipherText = aes.encrypt(plainText, key);
 		System.out.println("\nCIPHER TEXT:");
