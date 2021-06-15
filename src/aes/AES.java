@@ -41,6 +41,9 @@ public class AES {
 			{ "0x8C", "0xA1", "0x89", "0x0D", "0xBF", "0xE6", "0x42", "0x68", "0x41", "0x99", "0x2D", "0x0F", "0xB0",
 					"0x54", "0xBB", "0x16" } };
 
+	private static String[] roundConstants = { "0x01", "0x02", "0x04", "0x08", "0x10", "0x20", "0x40", "0x80", "0x1b",
+			"0x36" };
+
 	String[][][] allRoundKeys = new String[aesRounds + 1][n][n];
 
 	private void generateAllRoundKeys(String[][] round0Key) {
@@ -51,7 +54,7 @@ public class AES {
 			for (int j = 0; j < gw3.length; j++) {
 				gw3[j] = getSubByte(gw3[j]);
 			}
-			gw3[0] = bitwiseXOR(gw3[0], "0x01");
+			gw3[0] = bitwiseXOR(gw3[0], roundConstants[i - 1]);
 			String[] w4 = gw3;
 			for (int j = 0; j < w4.length; j++) {
 				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][0][j]);
@@ -69,8 +72,9 @@ public class AES {
 				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][3][j]);
 			}
 			allRoundKeys[i][3] = w4.clone();
-						printStringArray(allRoundKeys[i]);
-			break;
+			printStringArray(allRoundKeys[i]);
+			System.out.println();
+			// break;
 		}
 	}
 
