@@ -110,7 +110,7 @@ public class AES {
 			}
 		}
 		printStringArray(newState);
-		return newState; // TODO: implement
+		return newState;
 	}
 
 	private String[][] subBytes(String[][] currentState) {
@@ -127,7 +127,14 @@ public class AES {
 
 	private String[][] shiftRows(String[][] currentState) {
 		System.out.println("-> Shifting Rows: ");
-		return currentState; // TODO: implement
+		String[][] newState = currentState.clone();
+		for (int i = 1; i < n; i++) {
+			for (int j = 0; j < i; j++) {
+				leftShift(newState[i]);
+			}
+		}
+		printStringArray(newState);
+		return newState;
 	}
 
 	private String[][] mixColumns(String[][] currentState) {
