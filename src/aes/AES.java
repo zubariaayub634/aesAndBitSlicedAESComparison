@@ -82,6 +82,35 @@ public class AES {
 		return temp;
 	}
 
+	// Multiplies two bytes in garlois field 2^8
+	private String multiplyInGaloisField(byte a, byte b) {
+		byte returnValue = 0;
+		byte temp = 0;
+		while (a != 0) {
+			if ((a & 1) != 0)
+				returnValue = (byte) (returnValue ^ b);
+			temp = (byte) (b & 0x80);
+			b = (byte) (b << 1);
+			if (temp != 0)
+				b = (byte) (b ^ 0x1b);
+			a = (byte) ((a & 0xff) >> 1);
+		}
+		System.out.println(returnValue);
+		return Integer.toHexString((int) returnValue);
+	}
+
+	/*
+	 * private byte[][] mixColumns(byte[][] input) { int[] temp = new int[4]; for
+	 * (int i = 0; i < 4; i++) { temp[0] = multiply(d, input[0][i]) ^ multiply(a,
+	 * input[1][i]) ^ multiply(b, input[2][i]) ^ multiply(c, input[3][i]); temp[1] =
+	 * multiply(c, input[0][i]) ^ multiply(d, input[1][i]) ^ multiply(a,
+	 * input[2][i]) ^ multiply(b, input[3][i]); temp[2] = multiply(b, input[0][i]) ^
+	 * multiply(c, input[1][i]) ^ multiply(d, input[2][i]) ^ multiply(a,
+	 * input[3][i]); temp[3] = multiply(a, input[0][i]) ^ multiply(b, input[1][i]) ^
+	 * multiply(c, input[2][i]) ^ multiply(d, input[3][i]); for (int j = 0; j < 4;
+	 * j++) input[j][i] = (byte) (temp[j]); } return input; }
+	 */
+
 	private void leftShift(String[] array)// one left shift for now
 	{
 		String temp = array[0];
@@ -198,9 +227,10 @@ public class AES {
 		String[][] key = { { "0x54", "0x73", "0x20", "0x67" }, { "0x68", "0x20", "0x4b", "0x20" },
 				{ "0x61", "0x6d", "0x75", "0x46" }, { "0x74", "0x79", "0x6e", "0x75" } };
 		AES aes = new AES();
-		String[][] cipherText = aes.encrypt(plainText, key);
-		System.out.println("\nCIPHER TEXT:");
-		aes.printStringArray(cipherText);
-
+		// String[][] cipherText = aes.encrypt(plainText, key);
+		// System.out.println("\nCIPHER TEXT:");
+		// aes.printStringArray(cipherText);
+		System.out.println(Integer.toHexString((byte) 0x63));
+		System.out.println(aes.multiplyInGaloisField((byte) 0x02, (byte) 0x63));
 	}
 }
