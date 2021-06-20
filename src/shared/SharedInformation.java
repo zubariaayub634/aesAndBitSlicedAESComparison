@@ -1,7 +1,7 @@
 package shared;
 
 public class SharedInformation {
-	public final static int n = 4;
+	public final static int n = 16;
 	public final static int aesRounds = 10;
 
 	private static Integer[][] sBox = {
@@ -22,6 +22,7 @@ public class SharedInformation {
 			{ 0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF },
 			{ 0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16 } };
 
+	//size depends on no of aes rounds
 	private static Integer[] roundConstants = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 	public static Integer getSubByte(Integer prevByte) {
@@ -31,16 +32,15 @@ public class SharedInformation {
 	}
 
 	public static Integer[][][] generateAllRoundKeys(Integer[][] round0Key) {
-		Integer[][][] allRoundKeys = new Integer[SharedInformation.aesRounds
-				+ 1][SharedInformation.n][SharedInformation.n];
+		Integer[][][] allRoundKeys = new Integer[aesRounds + 1][n][n];
 		allRoundKeys[0] = round0Key.clone();
 		Utility.printArray(round0Key);
 		System.out.println();
-		for (int i = 1; i <= SharedInformation.aesRounds; i++) {
+		for (int i = 1; i <= aesRounds; i++) {
 			// pick last column of key as gw3
-			Integer[] gw3 = new Integer[SharedInformation.n];
-			for (int j = 0; j < SharedInformation.n; j++) {
-				gw3[j] = allRoundKeys[i - 1][j][SharedInformation.n - 1];
+			Integer[] gw3 = new Integer[n];
+			for (int j = 0; j < n; j++) {
+				gw3[j] = allRoundKeys[i - 1][j][n - 1];
 			}
 			Utility.leftShift(gw3);
 			for (int j = 0; j < gw3.length; j++) {
@@ -49,21 +49,11 @@ public class SharedInformation {
 			gw3[0] = gw3[0] ^ roundConstants[i - 1];
 
 			Integer[] w4 = gw3;
-			for (int j = 0; j < w4.length; j++) {
-				w4[j] = w4[j] ^ allRoundKeys[i - 1][j][0];
-				allRoundKeys[i][j][0] = w4[j];
-			}
-			for (int j = 0; j < w4.length; j++) {// w5
-				w4[j] = w4[j] ^ allRoundKeys[i - 1][j][1];
-				allRoundKeys[i][j][1] = w4[j];
-			}
-			for (int j = 0; j < w4.length; j++) {// w6
-				w4[j] = w4[j] ^ allRoundKeys[i - 1][j][2];
-				allRoundKeys[i][j][2] = w4[j];
-			}
-			for (int j = 0; j < w4.length; j++) {// w7
-				w4[j] = w4[j] ^ allRoundKeys[i - 1][j][3];
-				allRoundKeys[i][j][3] = w4[j];
+			for (int k = 0; k < n; k++) {
+				for (int j = 0; j < w4.length; j++) {
+					w4[j] = w4[j] ^ allRoundKeys[i - 1][j][k];
+					allRoundKeys[i][j][k] = w4[j];
+				}
 			}
 		}
 		return allRoundKeys;
