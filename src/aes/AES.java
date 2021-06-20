@@ -31,30 +31,37 @@ public class AES {
 
 	private void generateAllRoundKeys(Integer[][] round0Key) {
 		allRoundKeys[0] = round0Key.clone();
+		Utility.printArray(round0Key);
+		System.out.println();
 		for (int i = 1; i <= SharedInformation.aesRounds; i++) {
-			Integer[] gw3 = allRoundKeys[i - 1][SharedInformation.n - 1].clone();
+			// pick last column of key as gw3
+			Integer[] gw3 = new Integer[SharedInformation.n];
+			for (int j = 0; j < SharedInformation.n; j++) {
+				gw3[j] = allRoundKeys[i - 1][j][SharedInformation.n - 1];
+			}
 			leftShift(gw3);
 			for (int j = 0; j < gw3.length; j++) {
 				gw3[j] = getSubByte(gw3[j]);
 			}
 			gw3[0] = bitwiseXOR(gw3[0], roundConstants[i - 1]);
+
 			Integer[] w4 = gw3;
 			for (int j = 0; j < w4.length; j++) {
-				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][0][j]);
+				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][j][0]);
+				allRoundKeys[i][j][0] = w4[j];
 			}
-			allRoundKeys[i][0] = w4.clone();
 			for (int j = 0; j < w4.length; j++) {// w5
-				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][1][j]);
+				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][j][1]);
+				allRoundKeys[i][j][1] = w4[j];
 			}
-			allRoundKeys[i][1] = w4.clone();
 			for (int j = 0; j < w4.length; j++) {// w6
-				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][2][j]);
+				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][j][2]);
+				allRoundKeys[i][j][2] = w4[j];
 			}
-			allRoundKeys[i][2] = w4.clone();
 			for (int j = 0; j < w4.length; j++) {// w7
-				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][3][j]);
+				w4[j] = bitwiseXOR(w4[j], allRoundKeys[i - 1][j][3]);
+				allRoundKeys[i][j][3] = w4[j];
 			}
-			allRoundKeys[i][3] = w4.clone();
 		}
 	}
 
@@ -156,7 +163,9 @@ public class AES {
 		return newState;
 	}
 
-	private Integer[][] getRoundKey(int roundNo) {
+	private Integer[][] getRoundKey(Integer roundNo) {
+		System.out.println("Round Key of round " + roundNo.toString());
+		Utility.printArray(allRoundKeys[roundNo]);
 		return allRoundKeys[roundNo];
 	}
 
