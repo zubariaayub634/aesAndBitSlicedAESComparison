@@ -51,38 +51,20 @@ public class BitslicedAES {
 		return currentState;
 	}
 
-	private Integer[][] transformBundle(Integer[][] currentState) {
-		System.out.println("-> Transforming Bundle for Bitslicing: ");
-		// TODO: implement
-		Integer[][] newState = new Integer[SharedInformation.n * 2][SharedInformation.n / 2];
-		int currentStateRow = 0;
-		for (int i = SharedInformation.n / 2 - 1; i >= 0; i--) // column of newState being accessed
-		{
-			int j = 0; // row of newState being accessed
-			// even index row of currentState being accessed
-			for (int k = SharedInformation.n - 1; k >= 0; k--) {
-				newState[j][i] = currentState[currentStateRow][k];
-				j++;
-			}
-
-			currentStateRow++;
-
-			// odd index row of currentState being accessed
-			for (int k = SharedInformation.n - 1; k >= 0; k--) {
-				newState[j][i] = currentState[currentStateRow][k];
-				j++;
-			}
-
-			currentStateRow++;
-		}
-		return newState;
-	}
-
 	public Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
+		BundleTransformThread[] allTransformThreads = new BundleTransformThread[SharedInformation.aesRounds + 2];
+		int stateTransformThreadIndex = SharedInformation.aesRounds + 1;
+		allTransformThreads[stateTransformThreadIndex] = new BundleTransformThread(state);
 		System.out.println("\nGENERATING ALL ROUND KEYS...");
 		allRoundKeys = SharedInformation.generateAllRoundKeys(cipherKey);
-		Integer[][] temp = transformBundle(state);
-		Utility.printArray(temp);
+		for (int i = 0; i < allRoundKeys.length; i++) {
+			allTransformThreads[i] = new BundleTransformThread(allRoundKeys[i]);
+		}
+		while (!allTransformThreads[stateTransformThreadIndex].transformComplete)
+			;
+
+		// Integer[][] temp = transformBundle(state);
+		// Utility.printArray(temp);
 		// TODO: implement
 		return state;
 	}
