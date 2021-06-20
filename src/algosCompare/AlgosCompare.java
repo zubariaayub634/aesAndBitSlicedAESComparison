@@ -1,93 +1,11 @@
-package bitslicedAes;
+package algosCompare;
 
-import shared.SharedInformation;
-import shared.Utility;
+import aes.AES;
+import bitslicedAes.BitslicedAES;
 
-// A UNIVERSAL ASSUMPTION: all hex numbers in String are on two characters i.e between  and FF inclusive
-
-public class BitslicedAES {
-
-	Integer[][][] allRoundKeys;
-
-	private Integer[][] addRoundKey(Integer[][] currentState, Integer[][] roundKey) {
-		System.out.println("-> Adding Round Key: ");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] subBytes(Integer[][] currentState) {
-		System.out.println("-> Substituting Bytes: ");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] shiftRows(Integer[][] currentState) {
-		System.out.println("-> Shifting Rows: ");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] mixColumns(Integer[][] currentState) {
-		System.out.println("-> Mixing Columns: ");
-		// TODO: implement
-		return currentState; // TODO: implement
-	}
-
-	private Integer[][] performInitialRound(Integer[][] currentState) {
-		System.out.println("\nINITIAL ROUND:");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] performMainRound(Integer[][] currentState, Integer roundNo) {
-		System.out.println("\nMAIN ROUND " + roundNo.toString() + ":");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] performFinalRound(Integer[][] currentState) {
-		System.out.println("\nFINAL ROUND:");
-		// TODO: implement
-		return currentState;
-	}
-
-	private Integer[][] transformBundle(Integer[][] currentState) {
-		System.out.println("-> Transforming Bundle for Bitslicing: ");
-		// TODO: implement
-		Integer[][] newState = new Integer[SharedInformation.n * 2][SharedInformation.n / 2];
-		int currentStateRow = 0;
-		for (int i = SharedInformation.n / 2 - 1; i >= 0; i--) // column of newState being accessed
-		{
-			int j = 0; // row of newState being accessed
-			// even index row of currentState being accessed
-			for (int k = SharedInformation.n - 1; k >= 0; k--) {
-				newState[j][i] = currentState[currentStateRow][k];
-				j++;
-			}
-
-			currentStateRow++;
-
-			// odd index row of currentState being accessed
-			for (int k = SharedInformation.n - 1; k >= 0; k--) {
-				newState[j][i] = currentState[currentStateRow][k];
-				j++;
-			}
-
-			currentStateRow++;
-		}
-		return newState;
-	}
-
-	public Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
-		System.out.println("\nGENERATING ALL ROUND KEYS...");
-		allRoundKeys = SharedInformation.generateAllRoundKeys(cipherKey);
-		Integer[][] temp = transformBundle(state);
-		Utility.printArray(temp);
-		// TODO: implement
-		return state;
-	}
-
+public class AlgosCompare {
 	public static void main(String[] args) {
+		// plaintext and key of dimensions 16x16
 		Integer[][] plainText = {
 				{ 0x54, 0x4f, 0x4e, 0x20, 0x54, 0x4f, 0x4e, 0x20, 0x54, 0x4f, 0x4e, 0x20, 0x54, 0x4f, 0x4e, 0x20 },
 				{ 0x77, 0x6e, 0x69, 0x54, 0x77, 0x6e, 0x69, 0x54, 0x77, 0x6e, 0x69, 0x54, 0x77, 0x6e, 0x69, 0x54 },
@@ -122,11 +40,29 @@ public class BitslicedAES {
 				{ 0x68, 0x20, 0x4b, 0x20, 0x68, 0x20, 0x4b, 0x20, 0x68, 0x20, 0x4b, 0x20, 0x68, 0x20, 0x4b, 0x20 },
 				{ 0x61, 0x6d, 0x75, 0x46, 0x61, 0x6d, 0x75, 0x46, 0x61, 0x6d, 0x75, 0x46, 0x61, 0x6d, 0x75, 0x46 },
 				{ 0x74, 0x79, 0x6e, 0x75, 0x74, 0x79, 0x6e, 0x75, 0x74, 0x79, 0x6e, 0x75, 0x74, 0x79, 0x6e, 0x75 } };
-		BitslicedAES bitslicedAes = new BitslicedAES();
-		Utility.printArray(plainText);
-		System.out.println();
-		Integer[][] cipherText = bitslicedAes.encrypt(plainText, key);
-		System.out.println("\nCIPHER TEXT:");
-		Utility.printArray(cipherText);
+
+		final int experimentCount = 10;
+		long totalAesTimes = 0;
+		long totalBitSlicedAesTimes = 0;
+
+		for (int i = 0; i < experimentCount; i++) {
+
+			long aesStartTime = System.nanoTime();
+			AES aes = new AES();
+			aes.encrypt(plainText, key);
+			long aesEndTime = System.nanoTime();
+
+			totalAesTimes += aesEndTime - aesStartTime;
+
+			long bitSlicedAesStartTime = System.nanoTime();
+			BitslicedAES bitslicedAES = new BitslicedAES();
+			bitslicedAES.encrypt(plainText, key);
+			long bitSlicedAesEndTime = System.nanoTime();
+
+			totalBitSlicedAesTimes += bitSlicedAesEndTime - bitSlicedAesStartTime;
+		}
+
+		System.out.println("Average AES time in nanoseconds:           " + (totalAesTimes / experimentCount));
+		System.out.println("Average BitSliced AES time in nanoseconds: " + (totalBitSlicedAesTimes / experimentCount));
 	}
 }

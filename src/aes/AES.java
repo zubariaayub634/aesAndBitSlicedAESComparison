@@ -7,7 +7,7 @@ import shared.Utility;
 
 public class AES {
 
-	AES() {
+	public AES() {
 		for (int i = 0; i < SharedInformation.n; i++) {
 			for (int j = 0; j < SharedInformation.n; j++) {
 				if (i == j) {
@@ -103,7 +103,7 @@ public class AES {
 		return temp;
 	}
 
-	private Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
+	public Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
 		System.out.println("\nGENERATING ALL ROUND KEYS...");
 		allRoundKeys = SharedInformation.generateAllRoundKeys(cipherKey);
 		Integer[][] temp = performInitialRound(state);
