@@ -63,33 +63,30 @@ public class AES {
 	}
 
 	// Multiplies two bytes in garlois field 2^8
-	private String multiplyInGaloisField(byte a, byte b) {
-		byte returnValue = 0;
-		byte temp = 0;
-		while (a != 0) {
-			if ((a & 1) != 0)
-				returnValue = (byte) (returnValue ^ b);
-			temp = (byte) (b & 0x80);
-			b = (byte) (b << 1);
-			if (temp != 0)
-				b = (byte) (b ^ 0x1b);
-			a = (byte) ((a & 0xff) >> 1);
+	// a must either be 1 or 2 or 3
+	private Integer multiplyInGaloisField(Integer a, Integer b) {
+		if (a == 1) {
+			return b;
 		}
-		System.out.println(returnValue);
-		return Integer.toHexString((int) returnValue);
+		if (a == 2) {
+			Integer temp = b << 1;
+			if (temp >= 256) {
+				temp = temp % 256;
+				temp = bitwiseXOR(temp, 0x1b);
+			}
+			return temp;
+		}
+		if (a == 3) {
+			Integer temp = b << 1;
+			if (temp >= 256) {
+				temp = temp % 256;
+				temp = bitwiseXOR(temp, 0x1b);
+			}
+			return bitwiseXOR(temp, b);
+		}
+		System.out.println("----------------------INVALID ENTRY!!!!----------------------");
+		return 0;
 	}
-
-	/*
-	 * private byte[][] mixColumns(byte[][] input) { int[] temp = new int[4]; for
-	 * (int i = 0; i < 4; i++) { temp[0] = multiply(d, input[0][i]) ^ multiply(a,
-	 * input[1][i]) ^ multiply(b, input[2][i]) ^ multiply(c, input[3][i]); temp[1] =
-	 * multiply(c, input[0][i]) ^ multiply(d, input[1][i]) ^ multiply(a,
-	 * input[2][i]) ^ multiply(b, input[3][i]); temp[2] = multiply(b, input[0][i]) ^
-	 * multiply(c, input[1][i]) ^ multiply(d, input[2][i]) ^ multiply(a,
-	 * input[3][i]); temp[3] = multiply(a, input[0][i]) ^ multiply(b, input[1][i]) ^
-	 * multiply(c, input[2][i]) ^ multiply(d, input[3][i]); for (int j = 0; j < 4;
-	 * j++) input[j][i] = (byte) (temp[j]); } return input; }
-	 */
 
 	private void leftShift(Integer[] array)// one left shift for now
 	{
@@ -101,8 +98,8 @@ public class AES {
 	}
 
 	private Integer getSubByte(Integer prevByte) {
-		Integer row = prevByte/16;
-		Integer col = prevByte%16;
+		Integer row = prevByte / 16;
+		Integer col = prevByte % 16;
 		return sBox[row][col];
 	}
 
@@ -144,7 +141,19 @@ public class AES {
 
 	private Integer[][] mixColumns(Integer[][] currentState) {
 		System.out.println("-> Mixing Columns: ");
-		return currentState; // TODO: implement
+		Integer[][] fixedMatrix = { { 2, 3, 1, 1 }, { 1, 2, 3, 1 }, { 1, 1, 2, 3 }, { 3, 1, 1, 2 } };
+		Integer[][] newState = new Integer[4][4];
+		for (int i = 0; i < newState.length; i++) {
+			for (int j = 0; j < newState[i].length; j++) {
+				newState[i][j] = 0;
+				for (int k = 0; k < newState.length; k++) {
+					newState[i][j] = bitwiseXOR(multiplyInGaloisField(fixedMatrix[i][k], currentState[k][j]),
+							newState[i][j]);
+				}
+			}
+		}
+		Utility.printArray(newState);
+		return newState;
 	}
 
 	private Integer[][] getRoundKey(int roundNo) {
@@ -189,10 +198,8 @@ public class AES {
 		Integer[][] key = { { 0x54, 0x73, 0x20, 0x67 }, { 0x68, 0x20, 0x4b, 0x20 }, { 0x61, 0x6d, 0x75, 0x46 },
 				{ 0x74, 0x79, 0x6e, 0x75 } };
 		AES aes = new AES();
-		 Integer[][] cipherText = aes.encrypt(plainText, key);
-		 System.out.println("\nCIPHER TEXT:");
-		 Utility.printArray(cipherText);
-		//System.out.println(Integer.toHexString((byte) 0x63));
-		//System.out.println(aes.multiplyInGaloisField((byte) 0x02, (byte) 0x63));
+		Integer[][] cipherText = aes.encrypt(plainText, key);
+		System.out.println("\nCIPHER TEXT:");
+		Utility.printArray(cipherText);
 	}
 }
