@@ -1,6 +1,6 @@
 package aes;
 
-import shared.SharedInformation;
+import shared.SharedFunctionality;
 import shared.Utility;
 
 // A UNIVERSAL ASSUMPTION: all hex numbers in String are on two characters i.e between  and FF inclusive
@@ -8,11 +8,11 @@ import shared.Utility;
 public class AES {
 
 	public AES() {
-		for (int i = 0; i < SharedInformation.n; i++) {
-			for (int j = 0; j < SharedInformation.n; j++) {
+		for (int i = 0; i < SharedFunctionality.n; i++) {
+			for (int j = 0; j < SharedFunctionality.n; j++) {
 				if (i == j) {
 					fixedMatrix[i][j] = 2;
-				} else if ((i + 1) % SharedInformation.n == j) {
+				} else if ((i + 1) % SharedFunctionality.n == j) {
 					fixedMatrix[i][j] = 3;
 				} else {
 					fixedMatrix[i][j] = 1;
@@ -23,26 +23,14 @@ public class AES {
 
 	Integer[][][] allRoundKeys;
 
-	Integer[][] fixedMatrix = new Integer[SharedInformation.n][SharedInformation.n];
-
-	private Integer[][] addRoundKey(Integer[][] currentState, Integer[][] roundKey) {
-		System.out.println("-> Adding Round Key: ");
-		Integer[][] newState = currentState.clone();
-		for (int i = 0; i < newState.length; i++) {
-			for (int j = 0; j < newState[i].length; j++) {
-				newState[i][j] = newState[i][j] ^ roundKey[i][j];
-			}
-		}
-		Utility.printArray(newState);
-		return newState;
-	}
+	Integer[][] fixedMatrix = new Integer[SharedFunctionality.n][SharedFunctionality.n];
 
 	private Integer[][] subBytes(Integer[][] currentState) {
 		System.out.println("-> Substituting Bytes: ");
 		Integer[][] temp = currentState.clone();
-		for (int i = 0; i < SharedInformation.n; i++) {
-			for (int j = 0; j < SharedInformation.n; j++) {
-				temp[i][j] = SharedInformation.getSubByte(currentState[i][j]);
+		for (int i = 0; i < SharedFunctionality.n; i++) {
+			for (int j = 0; j < SharedFunctionality.n; j++) {
+				temp[i][j] = SharedFunctionality.getSubByte(currentState[i][j]);
 			}
 		}
 		Utility.printArray(temp);
@@ -50,9 +38,13 @@ public class AES {
 	}
 
 	private Integer[][] shiftRows(Integer[][] currentState) {
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+		}
 		System.out.println("-> Shifting Rows: ");
 		Integer[][] newState = currentState.clone();
-		for (int i = 1; i < SharedInformation.n; i++) {
+		for (int i = 1; i < SharedFunctionality.n; i++) {
 			for (int j = 0; j < i; j++) {
 				Utility.leftShift(newState[i]);
 			}
@@ -63,7 +55,7 @@ public class AES {
 
 	private Integer[][] mixColumns(Integer[][] currentState) {
 		System.out.println("-> Mixing Columns: ");
-		Integer[][] newState = new Integer[SharedInformation.n][SharedInformation.n];
+		Integer[][] newState = new Integer[SharedFunctionality.n][SharedFunctionality.n];
 		for (int i = 0; i < newState.length; i++) {
 			for (int j = 0; j < newState[i].length; j++) {
 				newState[i][j] = 0;
@@ -83,7 +75,7 @@ public class AES {
 
 	private Integer[][] performInitialRound(Integer[][] currentState) {
 		System.out.println("\nINITIAL ROUND:");
-		return addRoundKey(currentState, getRoundKey(0));
+		return SharedFunctionality.addRoundKey(currentState, getRoundKey(0));
 	}
 
 	private Integer[][] performMainRound(Integer[][] currentState, Integer roundNo) {
@@ -91,7 +83,7 @@ public class AES {
 		Integer[][] temp = subBytes(currentState);
 		temp = shiftRows(temp);
 		temp = mixColumns(temp);
-		temp = addRoundKey(temp, getRoundKey(roundNo));
+		temp = SharedFunctionality.addRoundKey(temp, getRoundKey(roundNo));
 		return temp;
 	}
 
@@ -99,15 +91,15 @@ public class AES {
 		System.out.println("\nFINAL ROUND:");
 		Integer[][] temp = subBytes(currentState);
 		temp = shiftRows(temp);
-		temp = addRoundKey(temp, getRoundKey(SharedInformation.aesRounds));
+		temp = SharedFunctionality.addRoundKey(temp, getRoundKey(SharedFunctionality.aesRounds));
 		return temp;
 	}
 
 	public Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
 		System.out.println("\nGENERATING ALL ROUND KEYS...");
-		allRoundKeys = SharedInformation.generateAllRoundKeys(cipherKey);
+		allRoundKeys = SharedFunctionality.generateAllRoundKeys(cipherKey);
 		Integer[][] temp = performInitialRound(state);
-		for (int i = 1; i < SharedInformation.aesRounds; i++) {
+		for (int i = 1; i < SharedFunctionality.aesRounds; i++) {
 			temp = performMainRound(temp, i);
 		}
 		return performFinalRound(temp);

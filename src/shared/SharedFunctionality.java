@@ -1,6 +1,6 @@
 package shared;
 
-public class SharedInformation {
+public class SharedFunctionality {
 	public final static int n = 16;
 	public final static int aesRounds = 10;
 
@@ -22,7 +22,7 @@ public class SharedInformation {
 			{ 0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF },
 			{ 0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16 } };
 
-	//size depends on no of aes rounds
+	// size depends on no of aes rounds
 	private static Integer[] roundConstants = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 	public static Integer getSubByte(Integer prevByte) {
@@ -57,5 +57,17 @@ public class SharedInformation {
 			}
 		}
 		return allRoundKeys;
+	}
+
+	public static Integer[][] addRoundKey(Integer[][] currentState, Integer[][] roundKey) {
+		System.out.println("-> Adding Round Key: ");
+		Integer[][] newState = currentState.clone();
+		for (int i = 0; i < newState.length; i++) {
+			for (int j = 0; j < newState[i].length; j++) {
+				newState[i][j] = newState[i][j] ^ roundKey[i][j];
+			}
+		}
+		Utility.printArray(newState);
+		return newState;
 	}
 }

@@ -1,6 +1,6 @@
 package bitslicedAes;
 
-import shared.SharedInformation;
+import shared.SharedFunctionality;
 import shared.Utility;
 
 // A UNIVERSAL ASSUMPTION: all hex numbers in String are on two characters i.e between  and FF inclusive
@@ -9,59 +9,151 @@ public class BitslicedAES {
 
 	Integer[][][] allRoundKeys;
 
-	private Integer[][] addRoundKey(Integer[][] currentState, Integer[][] roundKey) {
-		System.out.println("-> Adding Round Key: ");
-		// TODO: implement
-		return currentState;
-	}
-
 	private Integer[][] subBytes(Integer[][] currentState) {
 		System.out.println("-> Substituting Bytes: ");
-		// TODO: implement
-		return currentState;
+		Integer[][] temp = currentState.clone();
+		for (int i = 0; i < SharedFunctionality.n / 2; i++) {
+			for (int j = 0; j < SharedFunctionality.n / 2; j++) {
+				temp[i][j] = SharedFunctionality.getSubByte(currentState[i][j]);
+			}
+		}
+		Utility.printArray(temp);
+		return temp;
 	}
 
 	private Integer[][] shiftRows(Integer[][] currentState) {
 		System.out.println("-> Shifting Rows: ");
-		// TODO: implement
-		return currentState;
+		Integer[][] newState = currentState.clone();
+		for (int i = 1; i < SharedFunctionality.n / 2; i++) {
+			for (int j = 0; j < i; j++) {
+				Utility.leftShift(newState[i]);
+			}
+		}
+		Utility.printArray(newState);
+		return newState;
 	}
 
 	private Integer[][] mixColumns(Integer[][] currentState) {
+		Integer[][] fixedMatrix = new Integer[currentState.length][currentState.length];
+		for (int i = 0; i < currentState.length; i++) {
+			for (int j = 0; j < currentState.length; j++) {
+				if (i == j) {
+					fixedMatrix[i][j] = 2;
+				} else if ((i + 1) % currentState.length == j) {
+					fixedMatrix[i][j] = 3;
+				} else {
+					fixedMatrix[i][j] = 1;
+				}
+			}
+		}
 		System.out.println("-> Mixing Columns: ");
-		// TODO: implement
-		return currentState; // TODO: implement
+		Integer[][] newState = new Integer[currentState.length][currentState.length];
+		for (int i = 0; i < newState.length; i++) {
+			for (int j = 0; j < newState[i].length; j++) {
+				newState[i][j] = 0;
+				for (int k = 0; k < newState.length; k++) {
+					newState[i][j] = Utility.multiplyInGaloisField(fixedMatrix[i][k], currentState[k][j])
+							^ newState[i][j];
+				}
+			}
+		}
+		Utility.printArray(newState);
+		return newState;
 	}
 
-	private Integer[][] performInitialRound(Integer[][] currentState) {
+	private Integer[][] performInitialRound(Integer[][] currentState, Integer[][] roundKey) {
 		System.out.println("\nINITIAL ROUND:");
-		// TODO: implement
-		return currentState;
+		return SharedFunctionality.addRoundKey(currentState, roundKey);
 	}
 
-	private Integer[][] performMainRound(Integer[][] currentState, Integer roundNo) {
-		System.out.println("\nMAIN ROUND " + roundNo.toString() + ":");
-		// TODO: implement
-		return currentState;
+	private Integer[][] performMainRound(Integer[][] currentState, Integer[][] roundKey) {
+		Integer[][] temp = subBytes(currentState);
+		temp = shiftRows(temp);
+		temp = mixColumns(temp);
+		temp = SharedFunctionality.addRoundKey(temp, roundKey);
+		return temp;
 	}
 
-	private Integer[][] performFinalRound(Integer[][] currentState) {
+	private Integer[][] performFinalRound(Integer[][] currentState, Integer[][] roundKey) {
 		System.out.println("\nFINAL ROUND:");
-		// TODO: implement
-		return currentState;
+		Integer[][] temp = subBytes(currentState);
+		temp = shiftRows(temp);
+		temp = SharedFunctionality.addRoundKey(temp, roundKey);
+		return temp;
 	}
+
+	private Integer[][] transformBundle(Integer[][] currentState) {
+		Integer[][] newState = new Integer[SharedFunctionality.n * 2][SharedFunctionality.n / 2];
+		int currentStateRow = 0;
+		for (int i = SharedFunctionality.n / 2 - 1; i >= 0; i--) // column of newState being accessed
+		{
+			int j = 0; // row of newState being accessed
+			// even index row of currentState being accessed
+			for (int k = SharedFunctionality.n - 1; k >= 0; k--) {
+				newState[j][i] = currentState[currentStateRow][k];
+				j++;
+			}
+
+			currentStateRow++;
+
+			// odd index row of currentState being accessed
+			for (int k = SharedFunctionality.n - 1; k >= 0; k--) {
+				newState[j][i] = currentState[currentStateRow][k];
+				j++;
+			}
+
+			currentStateRow++;
+		}
+		return newState;
+	}
+
+	Integer[][][] transformedBundle(Integer[][] bundle) {
+		bundle = transformBundle(bundle);
+		int noOfBundles = SharedFunctionality.n / 4;
+		int newBundleSize = SharedFunctionality.n / 2;
+		Integer[][][] bundles = new Integer[noOfBundles][newBundleSize][newBundleSize];
+		for (int i = 0; i < noOfBundles; i++) {
+			for (int j = 0; j < newBundleSize; j++) {
+				for (int k = 0; k < newBundleSize; k++) {
+					bundles[i][j][k] = bundle[i * newBundleSize + j][k];
+				}
+			}
+		}
+		return bundles;
+	}
+	
+	/*private class ProcessBlock extends Thread{
+		ProcessBlock(Integer[][] state, Integer[][] roundKey){
+			start();
+		}
+		
+		public void run(){
+			Integer[][] temp = performInitialRound(transformedState[j], transformedRoundKeys[0][j]);
+			for (Integer i = 1; i < SharedFunctionality.aesRounds; i++) {
+				System.out.println("\nMAIN ROUND " + i.toString() + ":");
+				temp = performMainRound(temp, transformedRoundKeys[i][j]);
+			}
+			temp = performFinalRound(temp, transformedRoundKeys[SharedFunctionality.aesRounds][j]);	
+		}
+	}*/
 
 	public Integer[][] encrypt(Integer[][] state, Integer[][] cipherKey) {
-		BundleTransformThread[] allTransformThreads = new BundleTransformThread[SharedInformation.aesRounds + 2];
-		int stateTransformThreadIndex = SharedInformation.aesRounds + 1;
-		allTransformThreads[stateTransformThreadIndex] = new BundleTransformThread(state);
+		int stateTransformThreadIndex = SharedFunctionality.aesRounds + 1;
+		Integer[][][] transformedState = transformedBundle(state);
 		System.out.println("\nGENERATING ALL ROUND KEYS...");
-		allRoundKeys = SharedInformation.generateAllRoundKeys(cipherKey);
+		allRoundKeys = SharedFunctionality.generateAllRoundKeys(cipherKey);
+		Integer[][][][] transformedRoundKeys = new Integer[allRoundKeys.length][][][];
 		for (int i = 0; i < allRoundKeys.length; i++) {
-			allTransformThreads[i] = new BundleTransformThread(allRoundKeys[i]);
+			transformedRoundKeys[i] = transformedBundle(allRoundKeys[i]);
 		}
-		while (!allTransformThreads[stateTransformThreadIndex].transformComplete)
-			;
+		for (int j = 0; j < transformedState.length; j++) {
+			Integer[][] temp = performInitialRound(transformedState[j], transformedRoundKeys[0][j]);
+			for (Integer i = 1; i < SharedFunctionality.aesRounds; i++) {
+				System.out.println("\nMAIN ROUND " + i.toString() + ":");
+				temp = performMainRound(temp, transformedRoundKeys[i][j]);
+			}
+			temp = performFinalRound(temp, transformedRoundKeys[SharedFunctionality.aesRounds][j]);
+		}
 
 		// Integer[][] temp = transformBundle(state);
 		// Utility.printArray(temp);
